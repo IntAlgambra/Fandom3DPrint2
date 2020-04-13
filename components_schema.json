@@ -1,0 +1,19 @@
+{
+    "app" {
+        "Navbar": [],
+        "MainPage": [
+            "MainGallery",
+        ],
+        "Projects": {
+            "ProjectsGallery": [
+                "ProjectsGalleryItem"
+            ]
+        },
+        "Prices": {
+            "PricesGallery": [
+                "PricesGalleryItem"
+            ]
+        },
+        "Contacts": ["ConntactsForm"]
+    }
+}
