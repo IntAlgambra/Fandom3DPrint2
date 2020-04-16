@@ -32,25 +32,32 @@ export default {
   }),
   methods: {
     async logout() {
-      const response = await fetch("http://127.0.0.1:5000/logout/");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_ENDPOINT}/logout/`
+      );
       if (response.status === 200) {
         this.$emit("logout");
       }
     },
     async deleteQuestion(id) {
-      const response = await fetch(`http://127.0.0.1:5000/question/${id}`, {
-        method: "delete"
-      });
+      const response = await fetch(
+        `${process.env.VUE_APP_API_ENDPOINT}/question/${id}`,
+        {
+          method: "delete"
+        }
+      );
       if (response.status === 200) {
         this.questions = this.questions.filter(item => item.id !== id);
       }
     },
     genFileHref(id) {
-      return `http://127.0.0.1:5000/question/file/${id}`;
+      return `${process.env.VUE_APP_API_ENDPOINT}/question/file/${id}`;
     }
   },
   async mounted() {
-    const response = await fetch("http://127.0.0.1:5000/question/");
+    const response = await fetch(
+      `${process.env.VUE_APP_API_ENDPOINT}/question/`
+    );
     this.questions = await response.json();
   }
 };

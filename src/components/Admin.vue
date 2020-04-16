@@ -19,7 +19,9 @@ export default {
   }),
   methods: {
     async getAdminData() {
-      const response = await fetch("http://127.0.0.1:5000/authasadmin/");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_ENDPOINT}/authasadmin/`
+      );
       if (response.status === 200) {
         this.isAuthenticated = true;
       }
