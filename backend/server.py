@@ -121,10 +121,9 @@ def login():
     password = form_data["password"]
     if login == admin.login and bcrypt.check_password_hash(admin.password, password):
         session["is_admin"] = True
-        res.status_code = 200
+        res = make_response(("", 200, {"content-type": "application/json"}))
     else:
-        res.status_code = 401
-        res.data = {"message": "wrong login or password"}
+        res = make_response(('{"message": "wrong login or password"}', 401, {"content-type": "application/json"}))
     return res
 
 @app.route("/logout/", methods=["GET"])
