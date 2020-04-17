@@ -10,6 +10,7 @@ backend/*.db
 .env.local
 .env.*.local
 .env.production
+.env
 
 # Log files
 npm-debug.log*

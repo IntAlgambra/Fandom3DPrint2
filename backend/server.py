@@ -6,10 +6,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 #imports from site packages
 import click
+from dotenv import load_dotenv
 #imports from standart library
 import os
 import json
 import secrets
+
+#loading environment variables
+load_dotenv()
 
 #constants
 UPLOAD_FOLDER = "/user_files"
@@ -28,7 +32,9 @@ app = Flask(__name__,
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
 
 #Flask secret key for  interacting with sessions
-app.secret_key = secrets.token_urlsafe(16)
+app.secret_key = os.getenv("SECRET_KEY")
+
+print(app.secret_key)
 
 #setting app database and encryption plugins
 db = SQLAlchemy(app)
@@ -119,8 +125,6 @@ def login():
     admin = Admins.query.first()
     login = form_data["login"]
     password = form_data["password"]
-    with open("logininfo.txt", "w") as f:
-        f.write("{}\n{}".format(login, password))
     if login == admin.login and bcrypt.check_password_hash(admin.password, password):
         session["is_admin"] = True
         res = make_response(("", 200, {"content-type": "application/json"}))
