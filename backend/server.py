@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import os
 import json
 import secrets
+import requests
 
 #loading environment variables
 load_dotenv()
@@ -18,6 +19,9 @@ load_dotenv()
 #constants
 UPLOAD_FOLDER = "/user_files"
 ALLOWED_EXTENSIONS = ["stl", "3mf", "obj", "prt", "dwg", "pdf", "dxf"]
+
+#RECaptcha keys
+recaptcha_key = os.getenv('RECAPTCHA_KEY')
 
 #function for securing uploaded files filenames
 def is_allowed(filename):
@@ -65,11 +69,21 @@ class Admins(db.Model):
     login = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
 
+def check_captcha(captcha_token):
+    payload = {'response': captcha_token, 'secret': recaptcha_key}
+    res = requests.post("https://www.google.com/recaptcha/api/siteverify", payload)
+    res_data = json.loads(res.text)
+    return res_data['success']
+
 #Setting up routes
 @app.route('/question/', methods=["POST"])
 def get_question():
     email = request.form["email"]
     text = request.form["question"]
+    captcha_token = request.form["captcha_token"]
+    if  not check_captcha(captcha_token):
+        res = make_response(('{"message": "captcha is invalid"}', 400, {"content-type": "application/json"}))
+        return res
     if request.files:
         user_file = request.files['file']
         filename_key = secrets.token_hex(4)

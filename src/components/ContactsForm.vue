@@ -37,6 +37,13 @@
         <div class="invalid-feedback">Wronge file format</div>
         <div class="valid-feedback">Файл выбран</div>
       </div>
+      <vue-recaptcha
+        ref="recaptcha"
+        :sitekey="captchaKey"
+        :loadRecaptchaScript="true"
+        @verify="checkToken"
+        @expired="onCaptchaExpired"
+      ></vue-recaptcha>
       <div class="submit-group">
         <button type="submit" class="btn btn-primary">
           Отправить
@@ -49,15 +56,26 @@
 </template>
 
 <script>
+import VueRecaptcha from "vue-recaptcha";
+
 const ALLOWED_EXTENSIONS = ["stl", "3mf", "obj", "prt", "dwg", "pdf", "dxf"];
 
 export default {
   name: "ContactsForm",
   data: () => ({
     filename: "Choose file",
-    endpoint: "question/"
+    endpoint: "question/",
+    captchaToken: null,
+    captchaKey: process.env.VUE_APP_RECAPTCHA_KEY
   }),
+  components: { VueRecaptcha },
   methods: {
+    checkToken(token) {
+      this.captchaToken = token;
+    },
+    onCaptchaExpired() {
+      this.$refs.recaptcha.reset();
+    },
     validateField(field, condition) {
       if (condition) {
         field.classList.remove("is-invalid");
@@ -102,7 +120,7 @@ export default {
       const isEmailValid = this.validateEmail();
       const isQuestionValid = this.validateQuestion();
       const isFileValid = this.validateFile();
-      if (isEmailValid && isQuestionValid && isFileValid) {
+      if (isEmailValid && isQuestionValid && isFileValid && this.captchaToken) {
         const data = new FormData();
         const fileInput = document.querySelector("#file-input");
         const email = document.querySelector("#email-input").value;
@@ -112,6 +130,7 @@ export default {
         if (fileInput.files.length !== 0) {
           data.append("file", fileInput.files[0], fileInput.files[0].name);
         }
+        data.append("captcha_token", this.captchaToken);
         const response = await fetch(this.endpoint, {
           method: "post",
           body: data
@@ -132,10 +151,10 @@ export default {
       }, 2000);
     },
     showFailure() {
-      const successMsg = document.querySelector(".submit-failure");
-      successMsg.setAttribute("style", "display: flex;");
+      const failureMsg = document.querySelector(".submit-failed");
+      failureMsg.setAttribute("style", "display: flex;");
       setTimeout(() => {
-        successMsg.setAttribute("style", "display: none;");
+        failureMsg.setAttribute("style", "display: none;");
       }, 2000);
     },
     resetForm() {
@@ -158,7 +177,7 @@ export default {
 <style scoped>
 .form-container {
   position: absolute;
-  top: 20vh;
+  top: 15vh;
   right: 5vw;
   border: 1px solid lightgray;
   border-radius: 15px;
@@ -177,6 +196,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-top: 15px;
 }
 .submit-group div {
   margin-left: 15px;
